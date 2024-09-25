@@ -34,8 +34,8 @@ prepare() {
 build() {
   cd $pkgname-$pkgver
   make OMIT_SBAT=1
-  make gptsync
-  make fs
+  make OMIT_SBAT=1 gptsync
+  make OMIT_SBAT=1 fs
 }
 
 package_refind() {
