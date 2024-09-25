@@ -1,0 +1,105 @@
+# Maintainer: David Runge <dvzrv@archlinux.org>
+
+pkgbase=refind
+pkgname=(refind refind-docs)
+pkgver=0.14.2
+pkgrel=1
+pkgdesc="An EFI boot manager"
+arch=(aarch64)  # we build architecture-specific EFI binaries
+url="https://www.rodsbooks.com/refind/"
+makedepends=(
+  bash
+  dosfstools
+  efibootmgr
+  gnu-efi
+)
+source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
+sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
+b2sums=('987acb29d4d81c01db245cd8e1c9761072e34cf3dfaa3e4fa77e549ee2c1dc4c3f8cbd9218f42e4eb77478df3453095dba8b36324c289c6a10b81f1ecb202743')
+_arch='aa64'
+
+prepare() {
+  cd $pkgbase-$pkgver
+  # remove the path prefix from the css reference, so that the css can live
+  # in the same directory
+  sed -e 's|../Styles/||g' -i docs/$pkgbase/*.html
+  # hardcode RefindDir, so that refind-install can find refind_x64.efi
+  sed -e 's|RefindDir=\"\$ThisDir/refind\"|RefindDir="/usr/share/refind/"|g' -i refind-install
+  # add vendor line to the sbat file
+  printf 'refind.%s,%s,%s,refind,%s,%s\n' 'arch' '1' 'Arch Linux' "${epoch:+${epoch}:}${pkgver}-${pkgrel}" 'https://archlinux.org/packages/?q=refind' >> refind-sbat.csv
+}
+
+build() {
+  cd $pkgname-$pkgver
+  make
+  make gptsync
+  make fs
+}
+
+package_refind() {
+  license=(
+    BSD-2-Clause
+    CC-BY-SA-3.0
+    CC-BY-SA-4.0
+    GPL-2.0-only
+    GPL-2.0-or-later
+    GPL-3.0-or-later
+    LGPL-2.1-or-later
+    'LGPL-3.0-or-later OR CC-BY-SA-3.0'
+  )
+  depends=(
+    bash
+    dosfstools
+    efibootmgr
+  )
+  optdepends=(
+    'gptfdisk: for finding non-vfat ESP with refind-install'
+    'imagemagick: for refind-mkfont'
+    'openssl: for generating local certificates with refind-install'
+    'python: for refind-mkdefault'
+    'refind-docs: for HTML documentation'
+    'sbsigntools: for EFI binary signing with refind-install'
+    'sudo: for privilege elevation in refind-install and refind-mkdefault'
+  )
+
+  cd $pkgbase-$pkgver
+  # NOTE: the install target calls refind-install, therefore we install things
+  # manually
+  # efi binaries
+  install -vDm 644 refind/*.efi -t "$pkgdir/usr/share/$pkgname/"
+  install -vDm 644 drivers_*/*.efi -t "$pkgdir/usr/share/refind/drivers_$_arch/"
+  install -vDm 644 gptsync/*.efi -t "$pkgdir/usr/share/$pkgname/tools_$_arch/"
+  # sample config
+  install -vDm 644 $pkgname.conf-sample -t "$pkgdir/usr/share/$pkgname/"
+  # keys
+  install -vDm 644 keys/*{cer,crt} -t "$pkgdir/usr/share/$pkgname/keys/"
+  # keysdir
+  install -vdm 700 "$pkgdir/etc/refind.d/keys"
+  # fonts
+  install -vDm 644 fonts/*.png -t "$pkgdir/usr/share/$pkgname/fonts/"
+  # icons
+  install -vDm 644 icons/*.png -t "$pkgdir/usr/share/$pkgname/icons"
+  install -vDm 644 icons/svg/*.svg -t "$pkgdir/usr/share/$pkgname/icons/svg/"
+  # scripts
+  install -vDm 755 {refind-{install,mkdefault,sb-healthcheck},mkrlconf,mvrefind} -t "$pkgdir/usr/bin/"
+  install -vDm 755 fonts/mkfont.sh "$pkgdir/usr/bin/$pkgname-mkfont"
+  # man pages
+  install -vDm 644 docs/man/*.8 -t "$pkgdir/usr/share/man/man8/"
+  # docs
+  install -vDm 644 {CREDITS,NEWS,README}.txt -t "$pkgdir/usr/share/doc/$pkgname/"
+  install -vDm 644 fonts/README.txt "$pkgdir/usr/share/doc/$pkgname/README.$pkgname-mkfont.txt"
+  install -vDm 644 icons/README "$pkgdir/usr/share/doc/$pkgname/README.icons.txt"
+  install -vDm 644 keys/README.txt "$pkgdir/usr/share/doc/$pkgname/README.keys.txt"
+  # license
+  install -vDm 644 LICENSE.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
+}
+
+package_refind-docs() {
+  pkgdesc+=" - documentation"
+  license=(FDL-1.3-or-later)
+
+  cd $pkgbase-$pkgver
+  install -vDm 644 docs/$pkgbase/*.{html,png,svg,txt} -t "$pkgdir/usr/share/doc/$pkgbase/html/"
+  install -vDm 644 docs/Styles/*.css -t "$pkgdir/usr/share/doc/$pkgbase/html/"
+  install -vDm 644 images/$pkgbase-banner.{png,svg} -t "$pkgdir/usr/share/doc/$pkgbase/html/"
+}
