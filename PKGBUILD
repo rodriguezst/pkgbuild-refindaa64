@@ -33,7 +33,7 @@ prepare() {
 
 build() {
   cd $pkgname-$pkgver
-  make
+  make OMIT_SBAT=1
   make gptsync
   make fs
 }
