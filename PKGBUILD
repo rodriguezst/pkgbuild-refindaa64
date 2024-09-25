@@ -29,13 +29,15 @@ prepare() {
   printf 'refind.%s,%s,%s,refind,%s,%s\n' 'arch' '1' 'Arch Linux' "${epoch:+${epoch}:}${pkgver}-${pkgrel}" 'https://archlinux.org/packages/?q=refind' >> refind-sbat.csv
   # disable the cross compiler for aarch64
   sed -i 's/aarch64-linux-gnu-//g' Make.common
+  # Fix for SBAT on aarch64
+  sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
 }
 
 build() {
   cd $pkgname-$pkgver
-  make OMIT_SBAT=1
-  make OMIT_SBAT=1 gptsync
-  make OMIT_SBAT=1 fs
+  make
+  make gptsync
+  make fs
 }
 
 package_refind() {
