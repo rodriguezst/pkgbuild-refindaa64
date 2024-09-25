@@ -27,6 +27,8 @@ prepare() {
   sed -e 's|RefindDir=\"\$ThisDir/refind\"|RefindDir="/usr/share/refind/"|g' -i refind-install
   # add vendor line to the sbat file
   printf 'refind.%s,%s,%s,refind,%s,%s\n' 'arch' '1' 'Arch Linux' "${epoch:+${epoch}:}${pkgver}-${pkgrel}" 'https://archlinux.org/packages/?q=refind' >> refind-sbat.csv
+  # disable the cross compiler for aarch64
+  sed -i 's/aarch64-linux-gnu-//g' Make.common
 }
 
 build() {
