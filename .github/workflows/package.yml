@@ -1,0 +1,41 @@
+name: buildarmpkg
+on:
+  workflow_dispatch:
+  push:
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  makepkg:
+    runs-on: ubuntu-22.04
+    steps:
+      -
+        uses: actions/checkout@v4
+        with:
+          path: refind
+          fetch-depth: '1'
+      - 
+        id: time
+        uses: boredland/get-time-action@2.0.0
+        with:
+          format: 'YYYYMMDD'
+      -
+        name: buildarmpkg
+        uses: rodriguezst/manjaro-buildarmpkg-action@main
+        with:
+          pkgbuild-dir: ./refind
+          output-dir: ./artifacts
+      -
+        name: Release assets
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.time.outputs.time }}
+          name: ${{ steps.time.outputs.time }}
+          draft: false
+          prerelease: false
+          files: |
+            ./artifacts/*.pkg.tar.*
