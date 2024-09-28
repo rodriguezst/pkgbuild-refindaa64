@@ -12,7 +12,6 @@ makedepends=(
   dosfstools
   efibootmgr
   wget
-  python2
 )
 source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
 sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
@@ -35,7 +34,8 @@ prepare() {
 }
 
 build() {
-  wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
+  #wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
+  wget "https://github.com/tianocore/edk2/archive/refs/tags/edk2-stable202408.tar.gz" -O edk2.tar.gz
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
   sudo mv edk2-* /usr/local/edk2-vUDK2018
   pushd /usr/local/edk2-vUDK2018
