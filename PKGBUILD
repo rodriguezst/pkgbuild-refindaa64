@@ -12,6 +12,7 @@ makedepends=(
   dosfstools
   efibootmgr
   wget
+  python2
 )
 source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
 sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
