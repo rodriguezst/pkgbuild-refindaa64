@@ -39,6 +39,7 @@ build() {
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
   sudo mv edk2-* /usr/local/edk2-vUDK2018
   pushd /usr/local/edk2-vUDK2018
+  git submodule update --init
   source edksetup.sh
   sed -i 's/-Werror //g' BaseTools/Source/C/Makefiles/header.makefile
   cat BaseTools/Source/C/Makefiles/header.makefile
