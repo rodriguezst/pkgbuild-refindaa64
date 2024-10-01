@@ -30,13 +30,13 @@ prepare() {
   # disable the cross compiler for aarch64
   sed -i 's/aarch64-linux-gnu-//g' Make.common
   # Fix for SBAT on aarch64
-  #sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
+  sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
 }
 
 build() {
   cd $pkgname-$pkgver
-  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make edk2 OMIT_SBAT=1 ARCH=aarch64
-  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
+  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make edk2 ARCH=aarch64
+  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make fs_edk2 ARCH=aarch64
 }
 
 package_refind() {
