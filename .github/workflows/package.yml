@@ -14,27 +14,74 @@ jobs:
       -
         uses: actions/checkout@v4
         with:
-          path: refind
           fetch-depth: '1'
-      - 
-        id: time
-        uses: boredland/get-time-action@2.0.0
-        with:
-          format: 'YYYYMMDD'
       -
-        name: buildarmpkg
-        uses: rodriguezst/manjaro-buildarmpkg-action@main
-        with:
-          pkgbuild-dir: ./refind
-          output-dir: ./artifacts
+        name: Build docker image with build environment
+        run: |
+          docker build --rm -t edk2:builder .
+      - 
+        name: Install dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt install \
+            libarchive-dev \
+            libarchive-tools \
+            meson
+      - 
+        name: Install pacman
+        shell: bash
+        env:
+          PACMAN_VERSION: 6.0.2
+        run: |
+          sudo git clone --depth 1 https://gitlab.manjaro.org/packages/core/pacman.git
+          pushd pacman
+            sudo wget https://sources.archlinux.org/other/pacman/pacman-${PACMAN_VERSION}.tar.xz
+            sudo tar -xvf pacman-${PACMAN_VERSION}.tar.xz
+            pushd pacman-${PACMAN_VERSION}
+            #  sudo patch -p1 -i ../pacman-sync-first-option.patch Removed
+              sudo meson --prefix=/usr \
+                        --buildtype=plain \
+                        -Ddoc=disabled \
+                        -Ddoxygen=enabled \
+                        -Dscriptlet-shell=/usr/bin/bash \
+                        -Dldconfig=/usr/bin/ldconfig \
+                        build
+              sudo meson compile -C build
+              sudo meson install -C build
+            popd
+            sudo install -m644 pacman.conf /etc/pacman.conf
+            sudo install -m644 makepkg.conf /etc/
+            sudo mkdir -p /etc/pacman.d
+            sudo touch /etc/pacman.d/mirrorlist
+          popd
+      -
+        name: Run makepkg
+        shell: bash
+        run: |
+          cat << EOM | sudo tee -a /etc/makepkg.conf
+          CARCH="aarch64"
+          CHOST="aarch64-linux-gnu"
+          export ARCH='arm64'
+          export CROSS_COMPILE='aarch64-linux-gnu-'
+          EOM
+          makepkg -d
+          source PKGBUILD
+          echo "PACKAGE_NAME=$pkgbase-$pkgver-$pkgrel" >> $GITHUB_ENV
+      - 
+        name: Copy Package Files
+        run: |
+          mkdir -p ./artifacts
+          find . -type f -name '*.pkg.tar.*' -exec cp '{}' ./artifacts/ ';'
       -
         name: Release assets
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.time.outputs.time }}
-          name: ${{ steps.time.outputs.time }}
+          tag_name: ${{ env.PACKAGE_NAME }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ env.PACKAGE_NAME }}
           draft: false
           prerelease: false
           files: |

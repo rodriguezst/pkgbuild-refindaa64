@@ -11,7 +11,7 @@ makedepends=(
   bash
   dosfstools
   efibootmgr
-  gnu-efi
+  docker
 )
 source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
 sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
@@ -30,14 +30,13 @@ prepare() {
   # disable the cross compiler for aarch64
   sed -i 's/aarch64-linux-gnu-//g' Make.common
   # Fix for SBAT on aarch64
-  sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
+  #sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
 }
 
 build() {
   cd $pkgname-$pkgver
-  make
-  make gptsync
-  make fs
+  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make edk2 OMIT_SBAT=1 ARCH=aarch64
+  docker run --rm -v $(pwd):$(pwd) -w $(pwd) edk2:builder make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
 }
 
 package_refind() {
