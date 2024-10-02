@@ -57,8 +57,8 @@ prepare() {
 
 build() {
   cd $pkgname-$pkgver
-  make edk2 OMIT_SBAT=1 ARCH=aarch64
-  make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
+  make edk2 OMIT_SBAT=0 ARCH=aarch64
+  make fs_edk2 OMIT_SBAT=0 ARCH=aarch64
 }
 
 package_refind() {
