@@ -13,6 +13,7 @@ makedepends=(
   efibootmgr
   wget
   git
+  python2
 )
 source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
 sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
@@ -35,12 +36,10 @@ prepare() {
 }
 
 build() {
-  #wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
-  wget "https://github.com/tianocore/edk2/archive/refs/tags/edk2-stable202408.tar.gz" -O edk2.tar.gz
+  wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
   sudo mv edk2-* /usr/local/edk2-vUDK2018
   pushd /usr/local/edk2-vUDK2018
-  git submodule update --init
   source edksetup.sh
   sed -i 's/-Werror //g' BaseTools/Source/C/Makefiles/header.makefile
   cat BaseTools/Source/C/Makefiles/header.makefile
@@ -48,13 +47,17 @@ build() {
   sed -i 's/^TARGET .*/TARGET = RELEASE/g' Conf/target.txt
   sed -i 's/^TARGET_ARCH .*/TARGET_ARCH = AARCH64/g' Conf/target.txt
   sed -i 's/^TOOL_CHAIN_TAG .*/TOOL_CHAIN_TAG = GCC5/g' Conf/target.txt
+  sed -i 's/ENV(GCC5_AARCH64_PREFIX)/\/usr\/bin\/aarch64-linux-gnu-/g' Conf/tools_def.txt
+  sed -i 's/^DEFINE GCC5_AARCH64_CC_FLAGS .*/DEFINE GCC5_AARCH64_CC_FLAGS = DEF(GCC49_AARCH64_CC_FLAGS) -fno-pie -fno-pic -fno-unwind-tables/g' Conf/tools_def.txt
   cat Conf/target.txt
+  cat Conf/tools_def.txt
   make -C BaseTools
   make -C BaseTools/Source/C
   build
   popd
   cd $pkgname-$pkgver
-  make edk2 OMIT_SBAT=1
+  make edk2 ARCH=aarch64
+  make fs_edk2 ARCH=aarch64
 }
 
 package_refind() {
