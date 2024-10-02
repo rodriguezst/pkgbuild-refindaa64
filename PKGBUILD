@@ -1,19 +1,21 @@
 # Maintainer: David Runge <dvzrv@archlinux.org>
 
 pkgbase=refind
-pkgname=(refind refind-docs)
+pkgname=(refind-nabu refind-nabu-docs)
 pkgver=0.14.2
 pkgrel=1
 pkgdesc="An EFI boot manager"
 arch=(aarch64)  # we build architecture-specific EFI binaries
 url="https://www.rodsbooks.com/refind/"
+provides=(refind)
+conflicts=(refind)
 makedepends=(
   bash
   dosfstools
   efibootmgr
   python2
 )
-source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz
+source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgbase-src-$pkgver.tar.gz
         https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz)
 sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e'
             '8fd9316f08a5c30f8684b2fde73906a943bb067ec91699f41796e27679af73dbc38efaa100a57d4b835656b402d9c08896abc5c10fd0d607a7e0173b3d7a60b2')
@@ -53,15 +55,18 @@ prepare() {
   sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
   # unset EDK2BASE, we will set the variable manually
   sed -i 's/^export EDK2BASE=.*//g' Makefile
+  # modify up/down keys behaviour to use volume keys on Xiaomi Pad 5
+  sed -i 's/UpdateScroll(\&State, SCROLL_LINE_UP)/UpdateScroll(\&State, SCROLL_LINE_LEFT)/g' refind/menu.c
+  sed -i 's/UpdateScroll(\&State, SCROLL_LINE_DOWN)/UpdateScroll(\&State, SCROLL_LINE_RIGHT)/g' refind/menu.c
 }
 
 build() {
-  cd $pkgname-$pkgver
+  cd $pkgbase-$pkgver
   make edk2 OMIT_SBAT=1 ARCH=aarch64
   make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
 }
 
-package_refind() {
+package_refind-nabu() {
   license=(
     BSD-2-Clause
     CC-BY-SA-3.0
@@ -91,35 +96,35 @@ package_refind() {
   # NOTE: the install target calls refind-install, therefore we install things
   # manually
   # efi binaries
-  install -vDm 644 refind/*.efi -t "$pkgdir/usr/share/$pkgname/"
+  install -vDm 644 refind/*.efi -t "$pkgdir/usr/share/$pkgbase/"
   install -vDm 644 drivers_*/*.efi -t "$pkgdir/usr/share/refind/drivers_$_arch/"
-  install -vDm 644 gptsync/*.efi -t "$pkgdir/usr/share/$pkgname/tools_$_arch/"
+  install -vDm 644 gptsync/*.efi -t "$pkgdir/usr/share/$pkgbase/tools_$_arch/"
   # sample config
-  install -vDm 644 $pkgname.conf-sample -t "$pkgdir/usr/share/$pkgname/"
+  install -vDm 644 $pkgbase.conf-sample -t "$pkgdir/usr/share/$pkgbase/"
   # keys
-  install -vDm 644 keys/*{cer,crt} -t "$pkgdir/usr/share/$pkgname/keys/"
+  install -vDm 644 keys/*{cer,crt} -t "$pkgdir/usr/share/$pkgbase/keys/"
   # keysdir
   install -vdm 700 "$pkgdir/etc/refind.d/keys"
   # fonts
-  install -vDm 644 fonts/*.png -t "$pkgdir/usr/share/$pkgname/fonts/"
+  install -vDm 644 fonts/*.png -t "$pkgdir/usr/share/$pkgbase/fonts/"
   # icons
-  install -vDm 644 icons/*.png -t "$pkgdir/usr/share/$pkgname/icons"
-  install -vDm 644 icons/svg/*.svg -t "$pkgdir/usr/share/$pkgname/icons/svg/"
+  install -vDm 644 icons/*.png -t "$pkgdir/usr/share/$pkgbase/icons"
+  install -vDm 644 icons/svg/*.svg -t "$pkgdir/usr/share/$pkgbase/icons/svg/"
   # scripts
   install -vDm 755 {refind-{install,mkdefault,sb-healthcheck},mkrlconf,mvrefind} -t "$pkgdir/usr/bin/"
-  install -vDm 755 fonts/mkfont.sh "$pkgdir/usr/bin/$pkgname-mkfont"
+  install -vDm 755 fonts/mkfont.sh "$pkgdir/usr/bin/$pkgbase-mkfont"
   # man pages
   install -vDm 644 docs/man/*.8 -t "$pkgdir/usr/share/man/man8/"
   # docs
-  install -vDm 644 {CREDITS,NEWS,README}.txt -t "$pkgdir/usr/share/doc/$pkgname/"
-  install -vDm 644 fonts/README.txt "$pkgdir/usr/share/doc/$pkgname/README.$pkgname-mkfont.txt"
-  install -vDm 644 icons/README "$pkgdir/usr/share/doc/$pkgname/README.icons.txt"
-  install -vDm 644 keys/README.txt "$pkgdir/usr/share/doc/$pkgname/README.keys.txt"
+  install -vDm 644 {CREDITS,NEWS,README}.txt -t "$pkgdir/usr/share/doc/$pkgbase/"
+  install -vDm 644 fonts/README.txt "$pkgdir/usr/share/doc/$pkgbase/README.$pkgbase-mkfont.txt"
+  install -vDm 644 icons/README "$pkgdir/usr/share/doc/$pkgbase/README.icons.txt"
+  install -vDm 644 keys/README.txt "$pkgdir/usr/share/doc/$pkgbase/README.keys.txt"
   # license
-  install -vDm 644 LICENSE.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
+  install -vDm 644 LICENSE.txt -t "$pkgdir/usr/share/licenses/$pkgbase/"
 }
 
-package_refind-docs() {
+package_refind-nabu-docs() {
   pkgdesc+=" - documentation"
   license=(FDL-1.3-or-later)
 
