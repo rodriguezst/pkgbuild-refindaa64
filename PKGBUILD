@@ -34,7 +34,7 @@ prepare() {
   # fix for SBAT on aarch64
   sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
   # unset EDK2BASE, we will set the variable manually
-  sed -i 's/^export EDK2BASE=.*//g' Make.common
+  sed -i 's/^export EDK2BASE=.*//g' Makefile
 }
 
 build() {
