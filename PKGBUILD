@@ -33,13 +33,16 @@ prepare() {
   sed -i 's/aarch64-linux-gnu-//g' Make.common
   # fix for SBAT on aarch64
   sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
+  # unset EDK2BASE, we will set the variable manually
+  sed -i 's/^export EDK2BASE=.*//g' Make.common
 }
 
 build() {
   wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
-  sudo mv edk2-* /usr/local/edk2-vUDK2018
-  pushd /usr/local/edk2-vUDK2018
+  sudo mv edk2-* edk2-vUDK2018
+  pushd edk2-vUDK2018
+  export EDK2BASE=$(pwd)/edk2-vUDK2018
   source edksetup.sh
   sed -i 's/-Werror //g' BaseTools/Source/C/Makefiles/header.makefile
   cat BaseTools/Source/C/Makefiles/header.makefile
