@@ -59,8 +59,8 @@ build() {
   #build
   popd
   cd $pkgname-$pkgver
-  make edk2 ARCH=aarch64
-  make fs_edk2 ARCH=aarch64
+  make edk2 OMIT_SBAT=1 ARCH=aarch64
+  make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
 }
 
 package_refind() {
