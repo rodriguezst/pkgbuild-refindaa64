@@ -21,6 +21,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install \
+            gcc-aarch64-linux-gnu \
             libarchive-dev \
             libarchive-tools \
             meson \
