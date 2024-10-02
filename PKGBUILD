@@ -40,8 +40,8 @@ prepare() {
 build() {
   wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
-  #sudo mv edk2-* edk2-vUDK2018
-  pushd edk2-vUDK2018
+  sudo mv edk2-* edk2
+  pushd edk2
   export EDK2BASE=$(pwd)
   source edksetup.sh
   sed -i 's/-Werror //g' BaseTools/Source/C/Makefiles/header.makefile
