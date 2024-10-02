@@ -33,7 +33,7 @@ prepare() {
   sed -i 's/^TARGET_ARCH .*/TARGET_ARCH = AARCH64/g' Conf/target.txt
   sed -i 's/^TOOL_CHAIN_TAG .*/TOOL_CHAIN_TAG = GCC5/g' Conf/target.txt
   sed -i 's/ENV(GCC5_AARCH64_PREFIX)/\/usr\/bin\/aarch64-linux-gnu-/g' Conf/tools_def.txt
-  sed -i 's/^DEFINE GCC5_AARCH64_CC_FLAGS .*/DEFINE GCC5_AARCH64_CC_FLAGS = DEF(GCC49_AARCH64_CC_FLAGS) -fno-pie -fno-pic -fno-unwind-tables/g' Conf/tools_def.txt
+  sed -i 's/^DEFINE GCC5_AARCH64_CC_FLAGS .*/DEFINE GCC5_AARCH64_CC_FLAGS = DEF(GCC49_AARCH64_CC_FLAGS) -fno-pie -fno-pic/g' Conf/tools_def.txt
   cat Conf/target.txt
   cat Conf/tools_def.txt
   make -C BaseTools
