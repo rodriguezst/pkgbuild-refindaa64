@@ -38,11 +38,12 @@ prepare() {
 }
 
 build() {
-  rm -rf /usr/local/edk2-vUDK2018
+  pushd /tmp
   wget "https://github.com/tianocore/edk2/releases/download/vUDK2018/edk2-vUDK2018.tar.gz" -O edk2.tar.gz
   tar zxf edk2.tar.gz && rm -rf edk2.tar.gz
-  sudo mv edk2-* /usr/local/edk2-vUDK2018
-  pushd /usr/local/edk2-vUDK2018
+  sudo mv edk2-* edk2
+  cd edk2
+  find .
   export EDK2BASE=$(pwd)
   echo EDK2BASE=${EDK2BASE}
   source edksetup.sh
