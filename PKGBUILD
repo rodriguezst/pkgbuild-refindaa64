@@ -56,7 +56,7 @@ build() {
   cat Conf/tools_def.txt
   make -C BaseTools
   make -C BaseTools/Source/C
-  ./build
+  #build
   popd
   cd $pkgname-$pkgver
   make edk2 ARCH=aarch64
