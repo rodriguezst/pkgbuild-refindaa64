@@ -20,10 +20,12 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
+          sudo apt-get remove python3
           sudo apt install \
             libarchive-dev \
             libarchive-tools \
-            meson
+            meson \
+            python2
       - 
         name: Install pacman
         shell: bash
