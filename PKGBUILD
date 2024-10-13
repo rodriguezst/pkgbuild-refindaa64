@@ -3,7 +3,7 @@
 pkgbase=refind
 pkgname=(refind-nabu refind-nabu-docs)
 pkgver=0.14.2
-pkgrel=1
+pkgrel=2
 pkgdesc="An EFI boot manager"
 arch=(aarch64)  # we build architecture-specific EFI binaries
 url="https://www.rodsbooks.com/refind/"
@@ -50,7 +50,7 @@ prepare() {
   # add vendor line to the sbat file
   printf 'refind.%s,%s,%s,refind,%s,%s\n' 'arch' '1' 'Arch Linux' "${epoch:+${epoch}:}${pkgver}-${pkgrel}" 'https://archlinux.org/packages/?q=refind' >> refind-sbat.csv
   # disable the cross compiler for aarch64
-  sed -i 's/aarch64-linux-gnu-//g' Make.common
+  #sed -i 's/aarch64-linux-gnu-//g' Make.common
   # fix for SBAT on aarch64
   sed -i 's/-O binary/--target=efi-app-aarch64/g' Make.common
   # unset EDK2BASE, we will set the variable manually
@@ -62,8 +62,8 @@ prepare() {
 
 build() {
   cd $pkgbase-$pkgver
-  make edk2 OMIT_SBAT=1 ARCH=aarch64
-  make fs_edk2 OMIT_SBAT=1 ARCH=aarch64
+  make edk2 ARCH=aarch64
+  make fs_edk2 ARCH=aarch64
 }
 
 package_refind-nabu() {
